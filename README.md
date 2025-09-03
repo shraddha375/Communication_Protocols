@@ -6,9 +6,19 @@
 
 **Simplex** : Data can only travel from sender to receiver (in one direction).
 
+<p align="center">
+ <img src="https://github.com/shraddha375/Communication_Protocols/blob/main/images/image1.jpg" width=50% height=50%>
+</p>
+
+
 **Duplex** : Data can travel from device1 to device2 and vice versa.
  - Half-Duplex : At one time only one device can communicate the data.
  - Full-Duplex : Both devices can simultaneously send or receive data.
+
+
+<p align="center">
+ <img src="https://github.com/shraddha375/Communication_Protocols/blob/main/images/image2.jpg" width=50% height=50%>
+</p>
 
 ---
 ### Serial vs Parallel
@@ -34,11 +44,3 @@
 **Multi-drop** : Single transmitter and multiple receivers *(SPI)*.
 
 **Multi-point** : Channel is shared between devices *(I2C)*.
-
-<p align="center">
- <img src="https://github.com/shraddha375/Communication_Protocols/blob/main/images/image1.jpg" width=50% height=50%>
-</p>
-
-<p align="center">
- <img src="https://github.com/shraddha375/Communication_Protocols/blob/main/images/image2.jpg" width=50% height=50%>
-</p>
