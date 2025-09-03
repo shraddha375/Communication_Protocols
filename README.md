@@ -34,3 +34,11 @@
 **Multi-drop** : Single transmitter and multiple receivers *(SPI)*.
 
 **Multi-point** : Channel is shared between devices *(I2C)*.
+
+<p align="center">
+ <img src="https://github.com/shraddha375/Communication_Protocols/blob/main/images/image1.jpg" width=50% height=50%>
+</p>
+
+<p align="center">
+ <img src="https://github.com/shraddha375/Communication_Protocols/blob/main/images/image2.jpg" width=50% height=50%>
+</p>
