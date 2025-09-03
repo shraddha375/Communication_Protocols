@@ -14,6 +14,7 @@
 ### Serial vs Parallel
 
 **Serial** : Data sent serially on line. e.g. UART
+
 **Parallel** : Data sent parallelly on line.
 
 ---
