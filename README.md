@@ -1,4 +1,4 @@
-# Coomunication Protocols
+# Communication Protocols
 
 ## Interfaces Classification
 ---
