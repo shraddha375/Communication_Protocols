@@ -1,3 +1,150 @@
+# Design Errors
+
+    module spi_master #(
+        parameter DATA_WIDTH = 8,
+        parameter CLK_DIV    = 10
+    )(
+        input                    clk,
+        input                    rst,
+        input                    start,
+        input [DATA_WIDTH - 1:0] tx_data,
+    
+        output logic                    sclk,
+        output logic                    mosi,
+        input                           miso,
+        output logic                    cs_n,
+        output logic [DATA_WIDTH - 1:0] rx_data,
+        output logic                    done
+    );
+        // States for FSM
+        localparam IDLE = 2'b00, TRANSFER = 2'b01, DONE = 2'b10;
+    
+        // Internal clock and counter
+        logic       sclk;
+        logic [3:0] scounter;
+    
+        // State and internal registers
+        logic [1:0] current_state, next_state;
+        logic [DATA_WIDTH - 1:0] shift_reg;
+        logic [$clog2(DATA_WIDTH) - 1:0] bit_cnt;
+        logic op_en;
+    
+        assign op_en = start | (~cs_n_reg);
+    
+        // Internal driven outputs
+        logic cs_n_reg;
+        logic done_reg;
+        logic [DATA_WIDTH-1:0] rx_data_reg;    
+    
+        assign cs_n    = cs_n_reg;
+        assign done    = done_reg;
+        assign rx_data = rx_data_reg;
+    
+        // Clock Divider counter
+        always_ff @(posedge clk or posedge rst) begin : CLK_DIVISON
+            if (rst) begin
+                scounter <=  'b0;
+                sclk     <= 1'b1;
+            end
+            else begin
+                if (~op_en) begin
+                    scounter <=  'b0;
+                    sclk     <= 1'b1;
+                end
+                else begin
+                    if (scounter == ((CLK_DIV / 2) - 1)) begin
+                        scounter <=  'b0;
+                        sclk     <= ~sclk;
+                    end
+                    else begin
+                        scounter <= scounter + 1;
+                        sclk     <= sclk;
+                    end
+                end
+            end
+        end
+    
+        // State Transition
+        always_ff @(posedge sclk or posedge rst) begin
+            if (rst) begin
+                current_state <= IDLE;
+            end
+            else begin
+                current_state <= next_state;
+            end
+        end
+    
+        // Next State Logic
+        always @(*) begin
+            case(current_state) 
+                IDLE     : begin
+                    if (start)
+                        next_state = TRANSFER;
+                    else
+                        next_state = IDLE;
+                end
+    
+                TRANSFER : begin
+                    if (bit_cnt == (DATA_WIDTH - 1)) 
+                        next_state = DONE;
+                    else 
+                        next_state = TRANSFER;
+                end
+    
+                DONE     : next_state = IDLE;
+    
+                default  : next_state = IDLE;
+            endcase
+        end
+    
+        always @(*) begin
+            case(current_state) 
+                IDLE     : begin
+                    cs_n_reg    = 1'b1;
+                    done_reg    = 1'b0;
+                    mosi        = 1'bx;
+                    shift_reg   = tx_data;
+                    rx_data_reg =  'b0;
+                end
+    
+                TRANSFER : begin
+                    cs_n_reg             = 1'b0;
+                    done_reg             = 1'b0;
+                    mosi                 = shift_reg[bit_cnt];
+                    rx_data_reg[bit_cnt] = miso;
+                end
+    
+                DONE     : begin
+                    cs_n_reg = 1'b1;
+                    done_reg = 1'b1;
+                    mosi     = 1'bx;
+                end
+    
+                default  : begin
+                    cs_n_reg  = 1'b1;
+                    done_reg  = 1'b0;
+                    mosi      = 1'bx;
+                    shift_reg =  'b0;
+                    rx_data_reg =  'b0;
+                end
+            endcase
+        end
+    
+        always_ff @(posedge sclk or posedge rst) begin
+            if (rst) begin
+                bit_cnt <= 'b0;
+            end
+            else begin
+                if (~cs_n_reg) begin
+                    bit_cnt <= bit_cnt + 1;
+                end
+                else
+                    bit_cnt <= 'b0;
+            end
+        end
+    
+    endmodule
+
 1. Circular Deadlock (The FSM Never Wakes Up)
 
 Your state transition relies on always_ff @(posedge sclk):
