@@ -1,6 +1,6 @@
 module spi_master #(
     parameter DATA_WIDTH = 8,
-    parameter CLK_DIV    = 10
+    parameter CLK_DIV    = 100
 )(
     input                           clk,
     input                           rst_n,
@@ -16,15 +16,23 @@ module spi_master #(
 );
     // States for FSM and Sate Registers
     localparam IDLE = 2'b00, TRANSFER = 2'b01, DONE = 2'b10;
-    logic [1:0] current_state, next_state;
+
+    localparam DIV_CNT_WIDTH =
+        (CLK_DIV <= 2) ? 1 : $clog2(CLK_DIV / 2);
+
+    localparam BIT_CNT_WIDTH =
+        (DATA_WIDTH <= 1) ? 1 : $clog2(DATA_WIDTH);
+
+    logic [1:0] current_state = IDLE;
+    logic [1:0] next_state;
 
     // Internal clock and counter
-    logic [3:0] scounter;
-    logic       sclk_tick;
+    logic [DIV_CNT_WIDTH-1:0] scounter;
+    logic                     sclk_tick;
 
     // Internal registers
     logic [DATA_WIDTH - 1:0] shift_reg;
-    logic [$clog2(DATA_WIDTH) - 1:0] bit_cnt;
+    logic [BIT_CNT_WIDTH-1:0] bit_cnt;
 
     // Internal driven outputs
     logic [DATA_WIDTH-1:0] rx_data_reg;    
@@ -39,22 +47,15 @@ module spi_master #(
             sclk_tick <= 1'b0;
         end
         else begin
-            if (cs_n) begin
+            if (scounter == ((CLK_DIV / 2) - 1)) begin
                 scounter  <=  'b0;
-                sclk      <= 1'b1;
-                sclk_tick <= 1'b0;
+                sclk      <= ~sclk;
+                sclk_tick <= 1'b1;
             end
             else begin
-                if (scounter == ((CLK_DIV / 2) - 1)) begin
-                    scounter  <=  'b0;
-                    sclk      <= ~sclk;
-                    sclk_tick <= 1'b1;
-                end
-                else begin
-                    scounter  <= scounter + 1;
-                    sclk      <= sclk;
-                    sclk_tick <= 1'b0;
-                end
+                scounter  <= scounter + 1;
+                sclk      <= sclk;
+                sclk_tick <= 1'b0;
             end
         end
     end
@@ -153,7 +154,7 @@ module spi_master #(
                 end
 
                 DONE     : begin
-                    // No change
+                    mosi <= 1'b0;
                 end
             endcase
         end
