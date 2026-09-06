@@ -33,7 +33,7 @@ To safely handle noise and voltage drops, LVCMOS33 specifies strict input/output
 
 ---
 
-### **Why It Matters for Your FPGA Project**
+### **Why It Matters**
 
 1. **Hardware Safety:** The FPGA chip's internal I/O banks are powered by specific power supply rails ($V_{CCO}$). Setting `IOSTANDARD LVCMOS33` tells Vivado that the pin belongs to an I/O bank powered at 3.3V. If you accidentally connect a 5V signal directly to an LVCMOS33 pin without a level shifter, you risk damaging the FPGA pin.
 2. **Peripheral Compatibility:** The switches, LEDs, and Pmod headers on your Nexys A7 operate natively at 3.3V. Matching `LVCMOS33` in your XDC constraints ensures your SPI lines (`sclk`, `mosi`, `miso`, `cs_n`) output correct 3.3V logic levels that external microcontrollers or sensors can read reliably.
