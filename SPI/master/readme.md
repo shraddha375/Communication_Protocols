@@ -48,9 +48,9 @@ The `spi_master` module is a generic, fully parameterized SPI Master core that e
 
 
 * **FSM State Control**: Implements a 3-state state machine:
-* `IDLE` (`2'b00`): Keeps `cs_n` High and `done` Low. On `start`, captures `tx_data` into `shift_reg` and prepares the MSB bit on `mosi`.
-* `TRANSFER` (`2'b01`): Pulls `cs_n` Low. Increments bit counters, toggles `sclk`, shifts out MOSI bits, and samples MISO bits.
-* `DONE` (`2'b10`): Returns `cs_n` High, asserts the `done` signal for one clock cycle, and returns to `IDLE`.
+** `IDLE` (`2'b00`): Keeps `cs_n` High and `done` Low. On `start`, captures `tx_data` into `shift_reg` and prepares the MSB bit on `mosi`.
+** `TRANSFER` (`2'b01`): Pulls `cs_n` Low. Increments bit counters, toggles `sclk`, shifts out MOSI bits, and samples MISO bits.
+** `DONE` (`2'b10`): Returns `cs_n` High, asserts the `done` signal for one clock cycle, and returns to `IDLE`.
 
 
 
