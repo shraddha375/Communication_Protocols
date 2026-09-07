@@ -1,15 +1,6 @@
 # SPI Master
 
-
-
-
-
-
-
-
-# SystemVerilog SPI Controller (Nexys A7)
-
-This repository contains a modular SystemVerilog implementation of an SPI Master interface designed for the **Nexys A7 (Artix-7)** FPGA board. The system is split into two distinct modules: a top-level FPGA hardware wrapper (`nexys_spi_top`) and a reusable SPI Master controller core (`spi_master`).
+This repository contains a modular System Verilog implementation of an SPI Master interface designed for the **Nexys A7 (Artix-7)** FPGA board. The system is split into two distinct modules: a top-level FPGA hardware wrapper (`nexys_spi_top`) and a reusable SPI Master controller core (`spi_master`).
 
 ---
 
