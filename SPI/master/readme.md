@@ -43,8 +43,8 @@ The `spi_master` module is a generic, fully parameterized SPI Master core that e
 * **Dynamic Parameterization**: Accepts configuration parameters for data width (`DATA_WIDTH`, default 8 bits) and clock division (`CLK_DIV`, default 100). The clock divider scales the input `clk` down to generate `sclk` (e.g., 100 MHz / 100 = 1 MHz SPI clock).
 * **Clock Division Logic**: Maintains an internal counter (`scounter`) to generate half-period toggles for `sclk` and outputs a single-cycle strobe (`sclk_tick`) to synchronize internal state shifts.
 * **SPI Mode 0 Timing**:
-* **Data Output (MOSI)**: Updates on the **rising edge** of `sclk` (MSB first).
-* **Data Input (MISO)**: Samples on the **falling edge** of `sclk` into the internal register (`rx_data_reg`).
+  * **Data Output (MOSI)**: Updates on the **rising edge** of `sclk` (MSB first).
+  * **Data Input (MISO)**: Samples on the **falling edge** of `sclk` into the internal register (`rx_data_reg`).
 
 
 * **FSM State Control**: Implements a 3-state state machine:
