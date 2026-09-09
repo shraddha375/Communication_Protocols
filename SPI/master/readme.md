@@ -46,12 +46,15 @@ The `spi_master` module is a generic, fully parameterized SPI Master core that e
   * **Data Output (MOSI)**: Updates on the **rising edge** of `sclk` (MSB first).
   * **Data Input (MISO)**: Samples on the **falling edge** of `sclk` into the internal register (`rx_data_reg`).
 
+<img width="1280" height="535" alt="image" src="https://github.com/user-attachments/assets/f261dfe9-ab1f-41ac-84b1-1941ac1131da" />
+
 
 * **FSM State Control**: Implements a 3-state state machine:
   * `IDLE` (`2'b00`): Keeps `cs_n` High and `done` Low. On `start`, captures `tx_data` into `shift_reg` and prepares the MSB bit on `mosi`.
   * `TRANSFER` (`2'b01`): Pulls `cs_n` Low. Increments bit counters, toggles `sclk`, shifts out MOSI bits, and samples MISO bits.
   * `DONE` (`2'b10`): Returns `cs_n` High, asserts the `done` signal for one clock cycle, and returns to `IDLE`.
 
+<img width="640" height="217" alt="image" src="https://github.com/user-attachments/assets/84425a10-8335-42c3-b528-c3b69cc4f96b" />
 
 
 ### Parameter Definitions
