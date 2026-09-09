@@ -46,7 +46,7 @@ The `spi_master` module is a generic, fully parameterized SPI Master core that e
   * **Data Output (MOSI)**: Updates on the **rising edge** of `sclk` (MSB first).
   * **Data Input (MISO)**: Samples on the **falling edge** of `sclk` into the internal register (`rx_data_reg`).
 
-<img width="1280" height="535" alt="image" src="https://github.com/user-attachments/assets/f261dfe9-ab1f-41ac-84b1-1941ac1131da" />
+<img width="640" height="267" alt="image" src="https://github.com/user-attachments/assets/f261dfe9-ab1f-41ac-84b1-1941ac1131da" />
 
 
 * **FSM State Control**: Implements a 3-state state machine:
