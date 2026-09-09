@@ -14,29 +14,32 @@ module spi_master #(
     output logic [DATA_WIDTH - 1:0] rx_data,
     output logic                    done
 );
+
+    //-------------------------------------------------------------------------------
+
     // States for FSM and Sate Registers
     localparam IDLE = 2'b00, TRANSFER = 2'b01, DONE = 2'b10;
 
-    localparam DIV_CNT_WIDTH =
-        (CLK_DIV <= 2) ? 1 : $clog2(CLK_DIV / 2);
+    localparam DIV_CNT_WIDTH = (CLK_DIV <= 2) ? 1 : $clog2(CLK_DIV / 2);
 
-    localparam BIT_CNT_WIDTH =
-        (DATA_WIDTH <= 1) ? 1 : $clog2(DATA_WIDTH);
+    localparam BIT_CNT_WIDTH = (DATA_WIDTH <= 1) ? 1 : $clog2(DATA_WIDTH);
 
-    logic [1:0] current_state = IDLE;
+    logic [1:0] current_state;
     logic [1:0] next_state;
 
-    // Internal clock and counter
+    // Internal counters and registers
     logic [DIV_CNT_WIDTH-1:0] scounter;
     logic                     sclk_tick;
 
-    // Internal registers
-    logic [DATA_WIDTH - 1:0] shift_reg;
+    logic [DATA_WIDTH - 1:0]  shift_reg;
     logic [BIT_CNT_WIDTH-1:0] bit_cnt;
 
     // Internal driven outputs
-    logic [DATA_WIDTH-1:0] rx_data_reg;    
+    logic [DATA_WIDTH-1:0] rx_data_reg;   
 
+    //------------------------------------------------------------------------------- 
+
+    // Slave data received
     assign rx_data = rx_data_reg;
 
     // Clock Divider counter
@@ -47,14 +50,22 @@ module spi_master #(
             sclk_tick <= 1'b0;
         end
         else begin
-            if (scounter == ((CLK_DIV / 2) - 1)) begin
-                scounter  <=  'b0;
-                sclk      <= ~sclk;
-                sclk_tick <= 1'b1;
+            // clock divider circuit becomes active only after cs_n goes low
+            if (~cs_n) begin
+                if (scounter == ((CLK_DIV / 2) - 1)) begin
+                    scounter  <=  'b0;
+                    sclk      <= ~sclk;
+                    sclk_tick <= 1'b1;
+                end
+                else begin
+                    scounter  <= scounter + 1;
+                    sclk      <= sclk;
+                    sclk_tick <= 1'b0;
+                end
             end
             else begin
-                scounter  <= scounter + 1;
-                sclk      <= sclk;
+                scounter  <= 'b0;
+                sclk      <= 1'b1;
                 sclk_tick <= 1'b0;
             end
         end
@@ -81,6 +92,7 @@ module spi_master #(
             end
 
             TRANSFER : begin
+                // Marks the end of transfer
                 if (sclk_tick && (sclk == 1'b0) && (bit_cnt == 0)) 
                     next_state = DONE;
                 else 
@@ -95,6 +107,9 @@ module spi_master #(
 
     // Output Logic
     always @(*) begin
+        cs_n = 1'b1;
+        done = 1'b0;
+
         case(current_state) 
             IDLE     : begin
                 cs_n = 1'b1;
@@ -138,13 +153,14 @@ module spi_master #(
                 end
 
                 TRANSFER : begin
+                    // First sampling happens because falling edge arrives first
                     if (sclk_tick) begin
                         if (sclk == 1'b1) begin
-                            // Rising edge of sclk : Master shifts MOSI out
+                            // Rising edge of sclk : Master shifts MOSI out/Slave shifts MISO out
                             mosi <= shift_reg[bit_cnt]; // MSB first
                         end 
                         else begin
-                            // Falling edge of sclk : Master samples MISO in
+                            // Falling edge of sclk : Master samples MISO in/ Salve samples MOSI in
                             rx_data_reg[bit_cnt] <= miso; 
                             if (bit_cnt != 0) begin
                                 bit_cnt <= bit_cnt - 1'b1;
